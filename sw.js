@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zakat-app-v5.1'; // قم بتحديث الإصدار
+const CACHE_NAME = 'zakat-app-v5.2'; // قم بتحديث الإصدار
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -49,4 +49,5 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
 
