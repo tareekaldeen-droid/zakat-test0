@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- السكربت الذكي لاختيار المانيفست (الاسم واللوجو) حسب اللغة -->
+    <!-- 1. نضع المانيفست العربي كافتراضي ثابت (لضمان ظهوره) -->
+    <link rel="manifest" id="app-manifest" href="manifest_ar.json">
+
+    <!-- 2. سكربت لتغييره فوراً إذا كانت اللغة تركية -->
     <script>
         (function() {
-            // نتحقق من اللغة المحفوظة، أو نأخذ لغة المتصفح
             var savedLang = localStorage.getItem('appLanguage') || (navigator.language.startsWith('tr') ? 'tr' : 'ar');
-            
-            var link = document.createElement('link');
-            link.rel = 'manifest';
-            // التبديل بين الملفين بناءً على اللغة
-            link.href = savedLang === 'tr' ? 'manifest_tr.json' : 'manifest_ar.json';
-            document.head.appendChild(link);
+            if (savedLang === 'tr') {
+                document.getElementById('app-manifest').setAttribute('href', 'manifest_tr.json');
+            }
         })();
     </script>
 
@@ -18666,6 +18665,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
