@@ -18350,13 +18350,7 @@ function loadSavedFont() {
 
 
 
-(function() {
-    var savedLang = localStorage.getItem('appLanguage') || (navigator.language.startsWith('tr') ? 'tr' : 'ar');
-    var link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = savedLang === 'tr' ? 'manifest_tr.json' : 'manifest_ar.json';
-    document.head.appendChild(link);
-  })();
+
 // ==========================================
 // منطق PWA المتقدم (Splash, Install, Notif, Updates)
 // ==========================================
@@ -18672,6 +18666,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
