@@ -1,10 +1,9 @@
-const CACHE_NAME = 'zakat-app-v 4.9';
-// الملفات التي سيتم تخزينها مؤقتاً (CSS, JS, Images)
+const CACHE_NAME = 'zakat-app-v5.0'; // قم بتحديث الإصدار
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest_ar.json', // إضافة ملف المانيفست العربي
-  './manifest_tr.json', // إضافة ملف المانيفست التركي
+  './manifest_ar.json', // ملف العربية
+  './manifest_tr.json', // ملف التركية
   'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
@@ -12,7 +11,7 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // فرض التحديث فوراً
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -32,26 +31,17 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  self.clients.claim(); // السيطرة الفورية على الصفحات المفتوحة
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // استراتيجية Network First لملف HTML لضمان التحديث الفوري
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, response.clone());
-            return response;
-          });
-        })
-        .catch(() => {
-          return caches.match(event.request);
-        })
+      fetch(event.request).catch(() => {
+        return caches.match('./index.html');
+      })
     );
   } else {
-    // استراتيجية Cache First للملفات الثابتة (صور، مكتبات)
     event.respondWith(
       caches.match(event.request).then((response) => {
         return response || fetch(event.request);
@@ -59,19 +49,3 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
