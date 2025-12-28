@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- هذا الكود هو المسؤول عن تحديد المانيفست الصحيح (الاسم واللوجو) قبل التحميل -->
+    <!-- السكربت الذكي لاختيار المانيفست (الاسم واللوجو) حسب اللغة -->
     <script>
         (function() {
-            // 1. تحديد اللغة المحفوظة أو لغة المتصفح
+            // نتحقق من اللغة المحفوظة، أو نأخذ لغة المتصفح
             var savedLang = localStorage.getItem('appLanguage') || (navigator.language.startsWith('tr') ? 'tr' : 'ar');
             
-            // 2. إنشاء رابط المانيفست ديناميكياً
             var link = document.createElement('link');
             link.rel = 'manifest';
-            // تحديد الملف بناءً على اللغة
+            // التبديل بين الملفين بناءً على اللغة
             link.href = savedLang === 'tr' ? 'manifest_tr.json' : 'manifest_ar.json';
             document.head.appendChild(link);
         })();
@@ -18681,6 +18680,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
