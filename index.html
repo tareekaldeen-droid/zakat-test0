@@ -18332,66 +18332,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ============================================
-// 📲 دالة مشاركة التطبيق (صورة + نص + رابط في رسالة واحدة)
+// 📲 دالة مشاركة التطبيق (صورة + بيانات الميتا + رابط)
 // ============================================
 async function shareAppGlobal() {
-    const lang = currentLanguage; 
+    const lang = currentLanguage; // ar أو tr
     
-    // روابط الصور
+    // 1. تحديد الصورة حسب اللغة (اللوجو عالي الدقة)
     const logos = {
         ar: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/gemini_generated_image_l7bj58l7bj58l7bj-1-1-okXWwLISbvVl1n90.png",
         tr: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/__gemini_generated_image_l7bj58l7bj58l7bj---uo3o-r-o-c-1-Egn1jwHegFrVqeor.png"
     };
 
-    // النصوص
-    const shareContent = {
+    // 2. تحديد النصوص (مطابقة لما في كود HTML الخاص بك)
+    const contentData = {
         ar: {
             title: "حاسبة الزكاة الذكية",
-            desc: "أدِّ فريضتك.. طهرةً لمالك ونماءً لرزقك.\nتطبيق شامل لحساب زكاة المال والذهب والأسهم.",
-            cta: "جربه الآن: "
+            desc: "تطبيق ويب متكامل لحساب الزكاة الشرعية بمختلف أنواعها."
         },
         tr: {
-            title: "Akıllı Zekât Hesaplayıcı",
-            desc: "Farzını ifa et.. malın için arınma ve rızkın için bereket.",
-            cta: "Şimdi dene: "
+            title: "Zekât Hesaplayıcı",
+            desc: "Zekât hesaplama uygulaması."
         }
     };
 
-    // 1. تجهيز الرابط
+    // تجهيز الرابط مع اللغة
     const appUrl = window.location.href.split('?')[0] + '?lang=' + lang;
-    const content = shareContent[lang];
+    const currentContent = contentData[lang];
     const currentLogoUrl = logos[lang];
 
-    // 2. دمج النص والرابط معاً (هذا هو السر لظهورهما مع الصورة)
-    // الترتيب: العنوان - سطر جديد - الوصف - سطر جديد - الرابط
-    const combinedText = `${content.title}\n\n${content.desc}\n\n${content.cta} ${appUrl}`;
+    // 3. دمج النص (هذا هو السر لظهوره مع الصورة)
+    // التنسيق: العنوان - سطر - الوصف - سطرين - الرابط
+    const combinedText = `${currentContent.title}\n${currentContent.desc}\n\n${appUrl}`;
 
     showToast(lang === 'ar' ? 'جاري تحضير المشاركة...' : 'Paylaşım hazırlanıyor...', 'info');
 
     try {
-        // 3. تحميل الصورة وتحويلها لملف
+        // تحميل الصورة وتحويلها لملف
         const response = await fetch(currentLogoUrl);
         const blob = await response.blob();
+        // نسمي الملف باسم مناسب
         const file = new File([blob], "zakat-app.png", { type: "image/png" });
 
-        // 4. المشاركة
+        // التحقق من دعم المشاركة
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
                 files: [file],       // الصورة
-                text: combinedText,  // النص + الرابط مدمجين هنا
-                // ملاحظة: لا نضع title أو url هنا لأن بعض الهواتف تفصلهم عن الصورة
+                text: combinedText,  // النص والرابط مدمجين هنا كشرح للصورة
+                // ملاحظة: لا نضع url هنا لضمان عدم فصله عن الصورة
             });
         } else {
-            throw new Error("File sharing not supported");
+            throw new Error("Sharing files not supported");
         }
         
     } catch (error) {
-        console.log("Sharing failed, falling back to text:", error);
-        // الخطة البديلة: مشاركة رابط ونص فقط (بدون صورة)
+        console.log("Image sharing failed, sharing link only:", error);
+        
+        // الخطة البديلة: مشاركة الرابط فقط (سيقوم واتساب بجلب الصورة والعنوان تلقائياً من الميتا تاج)
         try {
             await navigator.share({
-                title: content.title,
-                text: content.desc,
+                title: currentContent.title,
+                text: currentContent.desc,
                 url: appUrl
             });
         } catch (e) {
@@ -18401,6 +18401,7 @@ async function shareAppGlobal() {
         }
     }
 }
+
 
 
 
@@ -18769,6 +18770,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
