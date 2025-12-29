@@ -18332,13 +18332,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ============================================
-// 📲 دالة مشاركة التطبيق (نص + لوجو) حسب اللغة
+// 📲 دالة مشاركة التطبيق (صورة + نص + رابط في رسالة واحدة)
 // ============================================
 async function shareAppGlobal() {
-    // 1. تحديد البيانات حسب اللغة
-    const lang = currentLanguage; // المتغير العام الموجود في كودك
+    const lang = currentLanguage; 
     
-    // روابط الصور (اللوجو) حسب اللغة
+    // روابط الصور
     const logos = {
         ar: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/gemini_generated_image_l7bj58l7bj58l7bj-1-1-okXWwLISbvVl1n90.png",
         tr: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/__gemini_generated_image_l7bj58l7bj58l7bj---uo3o-r-o-c-1-Egn1jwHegFrVqeor.png"
@@ -18348,57 +18347,61 @@ async function shareAppGlobal() {
     const shareContent = {
         ar: {
             title: "حاسبة الزكاة الذكية",
-            text: "أدِّ فريضتك.. طهرةً لمالك ونماءً لرزقك.\nتطبيق شامل لحساب زكاة المال، الذهب، الأسهم، والعملات الرقمية بدقة عالية.\n\nجربه الآن: ",
+            desc: "أدِّ فريضتك.. طهرةً لمالك ونماءً لرزقك.\nتطبيق شامل لحساب زكاة المال والذهب والأسهم.",
+            cta: "جربه الآن: "
         },
         tr: {
             title: "Akıllı Zekât Hesaplayıcı",
-            text: "Farzını ifa et.. malın için arınma ve rızkın için bereket.\nPara, altın, hisse senedi ve kripto para zekâtını yüksek hassasiyetle hesaplayan kapsamlı uygulama.\n\nŞimdi dene: ",
+            desc: "Farzını ifa et.. malın için arınma ve rızkın için bereket.",
+            cta: "Şimdi dene: "
         }
     };
 
-    // الرابط مع تحديد اللغة لفتحه بنفس اللغة عند المستقبل
+    // 1. تجهيز الرابط
     const appUrl = window.location.href.split('?')[0] + '?lang=' + lang;
-    const currentData = shareContent[lang];
+    const content = shareContent[lang];
     const currentLogoUrl = logos[lang];
 
-    // إظهار رسالة انتظار لأن تحميل الصورة قد يأخذ ثانية
+    // 2. دمج النص والرابط معاً (هذا هو السر لظهورهما مع الصورة)
+    // الترتيب: العنوان - سطر جديد - الوصف - سطر جديد - الرابط
+    const combinedText = `${content.title}\n\n${content.desc}\n\n${content.cta} ${appUrl}`;
+
     showToast(lang === 'ar' ? 'جاري تحضير المشاركة...' : 'Paylaşım hazırlanıyor...', 'info');
 
     try {
-        // 2. محاولة تحميل الصورة ومشاركتها كملف
+        // 3. تحميل الصورة وتحويلها لملف
         const response = await fetch(currentLogoUrl);
         const blob = await response.blob();
-        const file = new File([blob], "zakat-app-logo.png", { type: "image/png" });
+        const file = new File([blob], "zakat-app.png", { type: "image/png" });
 
-        // التحقق مما إذا كان المتصفح يدعم مشاركة الملفات
+        // 4. المشاركة
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
-                title: currentData.title,
-                text: currentData.text + "\n" + appUrl,
-                files: [file]
+                files: [file],       // الصورة
+                text: combinedText,  // النص + الرابط مدمجين هنا
+                // ملاحظة: لا نضع title أو url هنا لأن بعض الهواتف تفصلهم عن الصورة
             });
         } else {
-            // إذا لم يدعم مشاركة الملفات، شارك النص والرابط فقط
             throw new Error("File sharing not supported");
         }
         
     } catch (error) {
-        console.log("Sharing with image failed, falling back to text only:", error);
-        
-        // 3. الخطة البديلة: مشاركة النص والرابط فقط
+        console.log("Sharing failed, falling back to text:", error);
+        // الخطة البديلة: مشاركة رابط ونص فقط (بدون صورة)
         try {
             await navigator.share({
-                title: currentData.title,
-                text: currentData.text,
+                title: content.title,
+                text: content.desc,
                 url: appUrl
             });
         } catch (e) {
-            // إذا فشل كل شيء (مثلاً على الكمبيوتر)، انسخ الرابط
-            navigator.clipboard.writeText(currentData.text + " " + appUrl);
-            showToast(lang === 'ar' ? 'تم نسخ الرابط للحافظة' : 'Bağlantı kopyalandı', 'success');
+            // النسخ للحافظة كحل أخير
+            navigator.clipboard.writeText(combinedText);
+            showToast(lang === 'ar' ? 'تم نسخ الرابط والنص' : 'Metin kopyalandı', 'success');
         }
     }
 }
+
 
 
 
@@ -18766,6 +18769,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
