@@ -18332,72 +18332,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ============================================
-// 📲 دالة المشاركة (الحل النهائي لمشكلة اختفاء الرابط)
+// 📲 دالة المشاركة الذكية (عربي/تركي) - صورة + نص + رابط
 // ============================================
 async function shareAppGlobal() {
-    const lang = currentLanguage; // ar أو tr
+    const lang = currentLanguage; // يجلب اللغة الحالية (ar أو tr)
     
-    // 1. روابط الصور (اللوجو)
-    const logos = {
-        ar: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/gemini_generated_image_l7bj58l7bj58l7bj-1-1-okXWwLISbvVl1n90.png",
-        tr: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/__gemini_generated_image_l7bj58l7bj58l7bj---uo3o-r-o-c-1-Egn1jwHegFrVqeor.png"
-    };
-
-    // 2. النصوص (مطابقة للميتا تاج)
-    const contentData = {
+    // 1. إعداد البيانات (عربي وتركي)
+    const shareConfig = {
         ar: {
+            // صورة اللوجو العربي
+            imageUrl: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=192,h=192,fit=crop/a5oqci6YCwpNHTpH/whatsapp-image-2025-12-19-at-11.11.04-am-fDCDqijtAhLk7CFm.png",
             title: "حاسبة الزكاة الذكية",
             desc: "تطبيق ويب متكامل لحساب الزكاة الشرعية بمختلف أنواعها."
         },
         tr: {
+            // صورة اللوجو التركي (استخدمت الصورة من المانيفست التركي)
+            imageUrl: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=192,h=192,fit=crop/a5oqci6YCwpNHTpH/__gemini_generated_image_l7bj58l7bj58l7bj---uo3o-r-o-c-1-Egn1jwHegFrVqeor.png",
             title: "Zekât Hesaplayıcı",
             desc: "Zekât hesaplama uygulaması."
         }
     };
 
-    // 3. تجهيز الرابط
+    // اختيار البيانات بناءً على اللغة الحالية
+    const currentData = shareConfig[lang];
+    
+    // تجهيز الرابط ليفتح على نفس اللغة
     const appUrl = window.location.href.split('?')[0] + '?lang=' + lang;
-    const currentContent = contentData[lang];
-    const currentLogoUrl = logos[lang];
 
-    // 🔥 الخطوة الأهم: دمج كل شيء في متغير نصي واحد
-    // هذا النص سيظهر أسفل الصورة في واتساب
-    const captionText = `${currentContent.title}\n${currentContent.desc}\n\n${appUrl}`;
+    // تجهيز النص الكامل (العنوان + الوصف + الرابط)
+    // هذا التنسيق سيظهر أسفل الصورة كشرح
+    const captionText = `${currentData.title}\n${currentData.desc}\n\n${appUrl}`;
 
     showToast(lang === 'ar' ? 'جاري تحضير المشاركة...' : 'Paylaşım hazırlanıyor...', 'info');
 
     try {
-        // جلب الصورة وتحويلها لملف
-        const response = await fetch(currentLogoUrl);
+        // 2. جلب الصورة المناسبة للغة وتحويلها لملف
+        const response = await fetch(currentData.imageUrl);
         const blob = await response.blob();
         const file = new File([blob], "zakat-app.png", { type: "image/png" });
 
-        // المشاركة
+        // 3. المشاركة
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
-                files: [file],       // نرسل ملف الصورة
-                text: captionText    // نضع العنوان والوصف والرابط هنا فقط
-                // ⚠️ ملاحظة: قمنا بحذف title و url من هنا لأن وجودهما يسبب المشكلة
+                files: [file],       // نرسل الصورة
+                text: captionText    // نرسل النص والرابط كشرح للصورة
+                // ملاحظة: لا نضع title أو url هنا لكي لا يفصلهم الهاتف عن الصورة
             });
         } else {
-            throw new Error("Sharing not supported");
+            // إذا كان الجهاز لا يدعم مشاركة الملفات، نشارك الرابط والنص فقط
+            await navigator.share({
+                title: currentData.title,
+                text: currentData.desc + "\n" + appUrl
+            });
         }
         
     } catch (error) {
-        console.log("Image share failed, fallback to link:", error);
-        
-        // إذا فشل إرسال الصورة، نرسل الرابط فقط (واتساب سيجلب الصورة تلقائياً من الموقع)
-        try {
-            await navigator.share({
-                title: currentContent.title,
-                text: currentContent.desc + "\n" + appUrl
-            });
-        } catch (e) {
-            navigator.clipboard.writeText(captionText);
-            showToast(lang === 'ar' ? 'تم نسخ الرابط' : 'Bağlantı kopyalandı', 'success');
-        }
+        console.log("Sharing failed:", error);
+        // في حال الفشل (مثل الكمبيوتر)، ننسخ الرابط
+        navigator.clipboard.writeText(captionText);
+        showToast(lang === 'ar' ? 'تم نسخ الرابط والنص' : 'Metin kopyalandı', 'success');
     }
 }
+
 
 
 
@@ -18768,6 +18764,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
