@@ -13417,6 +13417,11 @@ body.dark-mode .smart-logo-box {
 </div>
 
 
+<!-- زر مشاركة التطبيق -->
+<div class="menu-card" onclick="shareAppGlobal()">
+    <div class="icon-box soft-green">📲</div>
+    <span class="card-title" data-ar="مشاركة التطبيق" data-tr="Uygulamayı Paylaş">مشاركة التطبيق</span>
+</div>
 
 
 
@@ -18326,6 +18331,74 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+// ============================================
+// 📲 دالة مشاركة التطبيق (نص + لوجو) حسب اللغة
+// ============================================
+async function shareAppGlobal() {
+    // 1. تحديد البيانات حسب اللغة
+    const lang = currentLanguage; // المتغير العام الموجود في كودك
+    
+    // روابط الصور (اللوجو) حسب اللغة
+    const logos = {
+        ar: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/gemini_generated_image_l7bj58l7bj58l7bj-1-1-okXWwLISbvVl1n90.png",
+        tr: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/__gemini_generated_image_l7bj58l7bj58l7bj---uo3o-r-o-c-1-Egn1jwHegFrVqeor.png"
+    };
+
+    // النصوص
+    const shareContent = {
+        ar: {
+            title: "حاسبة الزكاة الذكية",
+            text: "أدِّ فريضتك.. طهرةً لمالك ونماءً لرزقك.\nتطبيق شامل لحساب زكاة المال، الذهب، الأسهم، والعملات الرقمية بدقة عالية.\n\nجربه الآن: ",
+        },
+        tr: {
+            title: "Akıllı Zekât Hesaplayıcı",
+            text: "Farzını ifa et.. malın için arınma ve rızkın için bereket.\nPara, altın, hisse senedi ve kripto para zekâtını yüksek hassasiyetle hesaplayan kapsamlı uygulama.\n\nŞimdi dene: ",
+        }
+    };
+
+    // الرابط مع تحديد اللغة لفتحه بنفس اللغة عند المستقبل
+    const appUrl = window.location.href.split('?')[0] + '?lang=' + lang;
+    const currentData = shareContent[lang];
+    const currentLogoUrl = logos[lang];
+
+    // إظهار رسالة انتظار لأن تحميل الصورة قد يأخذ ثانية
+    showToast(lang === 'ar' ? 'جاري تحضير المشاركة...' : 'Paylaşım hazırlanıyor...', 'info');
+
+    try {
+        // 2. محاولة تحميل الصورة ومشاركتها كملف
+        const response = await fetch(currentLogoUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "zakat-app-logo.png", { type: "image/png" });
+
+        // التحقق مما إذا كان المتصفح يدعم مشاركة الملفات
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: currentData.title,
+                text: currentData.text + "\n" + appUrl,
+                files: [file]
+            });
+        } else {
+            // إذا لم يدعم مشاركة الملفات، شارك النص والرابط فقط
+            throw new Error("File sharing not supported");
+        }
+        
+    } catch (error) {
+        console.log("Sharing with image failed, falling back to text only:", error);
+        
+        // 3. الخطة البديلة: مشاركة النص والرابط فقط
+        try {
+            await navigator.share({
+                title: currentData.title,
+                text: currentData.text,
+                url: appUrl
+            });
+        } catch (e) {
+            // إذا فشل كل شيء (مثلاً على الكمبيوتر)، انسخ الرابط
+            navigator.clipboard.writeText(currentData.text + " " + appUrl);
+            showToast(lang === 'ar' ? 'تم نسخ الرابط للحافظة' : 'Bağlantı kopyalandı', 'success');
+        }
+    }
+}
 
 
 
@@ -18659,6 +18732,18 @@ if ('serviceWorker' in navigator) {
 
 
 
+
+
+
+
+
+
+
+
+        
+
+
+
     </script>
    <!-- ربط ملف المانيفست -->
 <link rel="manifest" href="manifest.json">
@@ -18681,6 +18766,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
