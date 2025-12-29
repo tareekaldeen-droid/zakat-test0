@@ -21,7 +21,13 @@
 
    
 
+<title>حاسبة الزكاة الذكية | Zekât Hesaplayıcı</title>
+    <meta name="description" content="2025@DINYOLU">
+    <meta name="theme-color" content="#0d7c66">
 
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/37q072n986bg8r1rlj5ljk2iqkt-UbHFLyXccdPR0FBy.png">
 
 
 <!-- في قسم <head> أضف: -->
@@ -18702,12 +18708,43 @@ if ('serviceWorker' in navigator) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+    </script>
+   <!-- ربط ملف المانيفست -->
+<link rel="manifest" href="manifest.json">
+<!-- دعم هواتف آيفون -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="حاسبة الزكاة">
+<link rel="apple-touch-icon" href="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=192,h=192,fit=crop/a5oqci6YCwpNHTpH/whatsapp-image-2025-12-19-at-11.11.04-am-fDCDqijtAhLk7CFm.png">
+
+<script>
+  // تسجيل الـ Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('✅ تم تفعيل وضع العمل بدون اتصال بنجاح!'))
+        .catch(err => console.log('❌ فشل تفعيل وضع العمل بدون اتصال', err));
+    });
+  }
 </script>
 
 </body>
 </html>
-
-
 
 
 
