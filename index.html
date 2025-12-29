@@ -18332,18 +18332,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ============================================
-// 📲 دالة مشاركة التطبيق (صورة + بيانات الميتا + رابط)
+// 📲 دالة المشاركة (الحل النهائي لمشكلة اختفاء الرابط)
 // ============================================
 async function shareAppGlobal() {
     const lang = currentLanguage; // ar أو tr
     
-    // 1. تحديد الصورة حسب اللغة (اللوجو عالي الدقة)
+    // 1. روابط الصور (اللوجو)
     const logos = {
         ar: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/gemini_generated_image_l7bj58l7bj58l7bj-1-1-okXWwLISbvVl1n90.png",
         tr: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=711,fit=crop/a5oqci6YCwpNHTpH/__gemini_generated_image_l7bj58l7bj58l7bj---uo3o-r-o-c-1-Egn1jwHegFrVqeor.png"
     };
 
-    // 2. تحديد النصوص (مطابقة لما في كود HTML الخاص بك)
+    // 2. النصوص (مطابقة للميتا تاج)
     const contentData = {
         ar: {
             title: "حاسبة الزكاة الذكية",
@@ -18355,52 +18355,50 @@ async function shareAppGlobal() {
         }
     };
 
-    // تجهيز الرابط مع اللغة
+    // 3. تجهيز الرابط
     const appUrl = window.location.href.split('?')[0] + '?lang=' + lang;
     const currentContent = contentData[lang];
     const currentLogoUrl = logos[lang];
 
-    // 3. دمج النص (هذا هو السر لظهوره مع الصورة)
-    // التنسيق: العنوان - سطر - الوصف - سطرين - الرابط
-    const combinedText = `${currentContent.title}\n${currentContent.desc}\n\n${appUrl}`;
+    // 🔥 الخطوة الأهم: دمج كل شيء في متغير نصي واحد
+    // هذا النص سيظهر أسفل الصورة في واتساب
+    const captionText = `${currentContent.title}\n${currentContent.desc}\n\n${appUrl}`;
 
     showToast(lang === 'ar' ? 'جاري تحضير المشاركة...' : 'Paylaşım hazırlanıyor...', 'info');
 
     try {
-        // تحميل الصورة وتحويلها لملف
+        // جلب الصورة وتحويلها لملف
         const response = await fetch(currentLogoUrl);
         const blob = await response.blob();
-        // نسمي الملف باسم مناسب
         const file = new File([blob], "zakat-app.png", { type: "image/png" });
 
-        // التحقق من دعم المشاركة
+        // المشاركة
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
-                files: [file],       // الصورة
-                text: combinedText,  // النص والرابط مدمجين هنا كشرح للصورة
-                // ملاحظة: لا نضع url هنا لضمان عدم فصله عن الصورة
+                files: [file],       // نرسل ملف الصورة
+                text: captionText    // نضع العنوان والوصف والرابط هنا فقط
+                // ⚠️ ملاحظة: قمنا بحذف title و url من هنا لأن وجودهما يسبب المشكلة
             });
         } else {
-            throw new Error("Sharing files not supported");
+            throw new Error("Sharing not supported");
         }
         
     } catch (error) {
-        console.log("Image sharing failed, sharing link only:", error);
+        console.log("Image share failed, fallback to link:", error);
         
-        // الخطة البديلة: مشاركة الرابط فقط (سيقوم واتساب بجلب الصورة والعنوان تلقائياً من الميتا تاج)
+        // إذا فشل إرسال الصورة، نرسل الرابط فقط (واتساب سيجلب الصورة تلقائياً من الموقع)
         try {
             await navigator.share({
                 title: currentContent.title,
-                text: currentContent.desc,
-                url: appUrl
+                text: currentContent.desc + "\n" + appUrl
             });
         } catch (e) {
-            // النسخ للحافظة كحل أخير
-            navigator.clipboard.writeText(combinedText);
-            showToast(lang === 'ar' ? 'تم نسخ الرابط والنص' : 'Metin kopyalandı', 'success');
+            navigator.clipboard.writeText(captionText);
+            showToast(lang === 'ar' ? 'تم نسخ الرابط' : 'Bağlantı kopyalandı', 'success');
         }
     }
 }
+
 
 
 
@@ -18770,6 +18768,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
